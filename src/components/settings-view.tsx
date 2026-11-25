@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useRef } from "react";
 import { changePassword, logout } from "@/app/actions";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-rules";
-import { IconChevron, IconLogout } from "./icons";
+import { IconLogout } from "./icons";
 import { ThemeToggle } from "./theme-toggle";
 
 const input =
@@ -19,17 +18,8 @@ export function SettingsView() {
   }, undefined);
 
   return (
-    <div className="pt-3 lg:pt-0">
-      {/* Phones: header with a way back */}
-      <header className="lg:hidden">
-        <Link href="/" className="-ml-1 inline-flex items-center gap-0.5 py-1 text-[17px] text-pencil">
-          <IconChevron className="h-5 w-5 rotate-180" />
-          Home
-        </Link>
-        <h1 className="mt-1 text-[34px] leading-tight font-bold tracking-tight">Settings</h1>
-      </header>
-
-      <div className="mt-6 max-w-xl space-y-6 lg:mt-0">
+    <div>
+      <div className="max-w-xl space-y-6">
         <section className="rounded-2xl bg-surface p-5 lg:border lg:border-rule" aria-labelledby="pw">
           <h2 id="pw" className="text-[17px] font-semibold">Password</h2>
           <p className="mt-1 text-[15px] text-pencil">

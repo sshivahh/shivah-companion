@@ -42,3 +42,23 @@ export async function getToday() {
   await requirePageAuth();
   return todayYmd();
 }
+
+export type TransactionDTO = {
+  id: string;
+  date: string;
+  type: "income" | "expense";
+  amount: number;
+  category: string;
+  note: string | null;
+};
+
+export async function getTransactionsBetween(start: string, end: string): Promise<TransactionDTO[]> {
+  await connection();
+  await requirePageAuth();
+  const rows = await db.transaction.findMany({
+    where: { date: { gte: start, lte: end } },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    select: { id: true, date: true, type: true, amount: true, category: true, note: true },
+  });
+  return rows.map((r) => ({ ...r, type: r.type === "income" ? "income" : "expense" }));
+}

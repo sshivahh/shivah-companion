@@ -8,6 +8,7 @@ import { MIN_PASSWORD_LENGTH, hashPassword, verifyPassword } from "@/lib/passwor
 import { isYmd } from "@/lib/dates";
 import { STUDENT_COLORS } from "@/lib/colors";
 import { isTime } from "@/lib/lessons";
+import { MAX_AMOUNT, isCategory, type MoneyType } from "@/lib/money";
 
 const refresh = () => revalidatePath("/", "layout");
 
@@ -146,4 +147,35 @@ export async function changePassword(_prev: PasswordState, formData: FormData): 
   await db.account.update({ where: { id: 1 }, data: { passwordHash } });
   await startSession(passwordHash); // keep this device signed in; other devices are signed out
   return { ok: true };
+}
+
+// ---------- Money ----------
+
+type TransactionInput = { date: string; type: string; amount: number; category: string; note?: string | null };
+
+function cleanTransaction(input: TransactionInput) {
+  if (!isYmd(input.date)) throw new Error("Pick a valid date");
+  if (input.type !== "income" && input.type !== "expense") throw new Error("Choose money in or money out");
+  const type = input.type as MoneyType;
+  const amount = Math.round(Number(input.amount));
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error("Enter an amount above zero");
+  if (amount > MAX_AMOUNT) throw new Error("That amount is too large");
+  if (!isCategory(type, input.category)) throw new Error("Pick a category");
+  const note = (input.note ?? "").trim().slice(0, 500) || null;
+  return { date: input.date, type, amount, category: input.category, note };
+}
+
+/** Creates a transaction, or updates it when `id` is given. */
+export async function saveTransaction(input: TransactionInput, id?: string) {
+  await requireAuth();
+  const data = cleanTransaction(input);
+  if (id) await db.transaction.update({ where: { id }, data });
+  else await db.transaction.create({ data });
+  refresh();
+}
+
+export async function deleteTransaction(id: string) {
+  await requireAuth();
+  await db.transaction.delete({ where: { id } });
+  refresh();
 }

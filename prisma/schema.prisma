@@ -39,3 +39,19 @@ model Account {
   passwordHash String
   updatedAt    DateTime @updatedAt
 }
+
+/// Money in or out. Amounts are whole Rupiah, always positive; `type` says the direction.
+model Transaction {
+  id        String   @id @default(cuid())
+  /// Local date as YYYY-MM-DD
+  date      String
+  /// "income" or "expense"
+  type      String
+  amount    Int
+  /// Category id from src/lib/money.ts
+  category  String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}

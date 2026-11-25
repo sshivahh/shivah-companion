@@ -76,3 +76,15 @@ export const IconLogout = ({ className }: P) => (
     <path d="M9 21H5.5A2.5 2.5 0 0 1 3 18.5v-13A2.5 2.5 0 0 1 5.5 3H9M16 17l5-5-5-5M21 12H9" />
   </svg>
 );
+export const IconWallet = ({ className }: P) => (
+  <svg {...base} className={className}>
+    <path d="M19 7V5.5A2.5 2.5 0 0 0 16.5 3h-11A2.5 2.5 0 0 0 3 5.5v13A2.5 2.5 0 0 0 5.5 21h13a2.5 2.5 0 0 0 2.5-2.5v-9A2.5 2.5 0 0 0 18.5 7H5.5" />
+    <path d="M16.5 14h.01" />
+  </svg>
+);
+export const IconMenu = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+);
+export const IconX = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M6 6l12 12M18 6 6 18" /></svg>
+);
