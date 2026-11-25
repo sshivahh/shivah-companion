@@ -1,6 +1,6 @@
 # Shivah Companion
 
-Personal companion web app, built mobile-first for iPhone. Next.js 16 (App Router, Server Actions) + Prisma 7 + SQLite + Tailwind 4.
+Personal companion web app, built mobile-first for iPhone. Next.js 16 (App Router, Server Actions) + Prisma 7 + Postgres + Tailwind 4. Deployed on Vercel with Neon.
 
 ## Features
 
@@ -15,11 +15,14 @@ A group lesson is stored as one row per student (same date and time), so per-stu
 ## Run locally
 
 ```bash
-npm install            # also generates the Prisma client
-npx prisma migrate dev # creates dev.db
-npm run db:seed        # optional: imports the Nov 2026 WhatsApp log
-npm run dev            # http://localhost:3000 (also on your LAN)
+npm install                                # also generates the Prisma client
+npx prisma dev --name companion --detach   # local Postgres; put its URL in .env as DATABASE_URL
+npm run db:deploy                          # create the tables
+npm run set-password -- "<password>"       # or copy data: npm run copy-from-sqlite
+npm run dev                                # http://localhost:3000 (also on your LAN)
 ```
+
+Instead of `prisma dev`, you can point `DATABASE_URL` at a Neon dev branch.
 
 To use it on your phone over the same Wi-Fi, open `http://<your-mac-ip>:3000`. In Safari, Share → **Add to Home Screen** makes it open full-screen like an app.
 
@@ -35,11 +38,16 @@ The app has one password and no username. It's stored in the database as a scryp
 
 | Var | Purpose |
 | --- | --- |
-| `DATABASE_URL` | SQLite file, default `file:./dev.db` |
+| `DATABASE_URL` | Postgres connection string (pooled on Vercel) |
+| `DATABASE_URL_UNPOOLED` | Optional direct connection used for migrations. Vercel's Neon integration sets it. |
 | `AUTH_SECRET` | Long random string used to sign login cookies. Changing it signs every device out. **Set a new one when deploying.** |
 | `APP_INITIAL_PASSWORD` | Optional. On a brand-new database with no password yet, this password is accepted once and saved (hashed). Leave empty after that. |
 | `APP_TIMEZONE` | Timezone used for "today" (default `Asia/Jakarta`) |
 
-## Deploying
+## Deploying (Vercel + Neon)
 
-SQLite needs a persistent disk, so it works on hosts like Railway or Fly.io with a volume. For Vercel, switch to Postgres: set `provider = "postgresql"` in `prisma/schema.prisma`, swap `@prisma/adapter-better-sqlite3` for `@prisma/adapter-pg` in `src/lib/db.ts`, and re-create the migrations.
+1. Import the GitHub repo in Vercel (preset: Next.js).
+2. In the project, **Storage → Create Database → Neon**, and connect it. This sets `DATABASE_URL` and `DATABASE_URL_UNPOOLED`.
+3. Add `AUTH_SECRET` (new random string) and `APP_TIMEZONE` under **Settings → Environment Variables**.
+4. Deploy. The `vercel-build` script runs `prisma migrate deploy` before `next build`, so the tables are created and kept up to date automatically.
+5. Put data in: `DATABASE_URL="<neon url>" npm run copy-from-sqlite` copies students, lessons and the password from an old `dev.db`. Or set a fresh password with `DATABASE_URL="<neon url>" npm run set-password -- "<password>"`.
