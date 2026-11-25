@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Student {
+  id        String    @id @default(cuid())
+  name      String
+  color     String
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+}
+
+/// One lesson with one student on one day.
+model Session {
+  id        String   @id @default(cuid())
+  /// Local calendar date as YYYY-MM-DD (no timezone surprises).
+  date      String
+  /// Start time as HH:MM (24h). Null for lessons logged before times existed.
+  time      String?
+  note      String?
+  createdAt DateTime @default(now())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date, time])
+  @@index([date])
+}
+
+/// The single owner account. Only a password, no username.
+model Account {
+  id           Int      @id @default(1)
+  /// scrypt$salt$key (base64url)
+  passwordHash String
+  updatedAt    DateTime @updatedAt
+}

@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #16213e;
+  --pencil: #657089;
+  --rule: #dfe3ea;
+  color-scheme: light;
+}
+
+/* Dark theme: follows the device unless the toggle picked one (html[data-theme]). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f131b;
+    --surface: #171c26;
+    --ink: #e6eaf2;
+    --pencil: #8b94a7;
+    --rule: #262d3a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0f131b;
+  --surface: #171c26;
+  --ink: #e6eaf2;
+  --pencil: #8b94a7;
+  --rule: #262d3a;
+  color-scheme: dark;
+}
+
+/* Tailwind's dark: variant follows the same rule. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-pencil: var(--pencil);
+  --color-rule: var(--rule);
+  /* Text on top of a highlighter fill is always dark navy, in both themes. */
+  --color-mark-ink: #16213e;
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+
+  --animate-modal-in: modal-in 0.22s cubic-bezier(0.2, 0.9, 0.25, 1);
+  --animate-fade-in: fade-in 0.2s ease-out;
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+.pt-safe { padding-top: max(env(safe-area-inset-top), 20px); }
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 10px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
